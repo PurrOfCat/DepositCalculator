@@ -10,15 +10,22 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+    private final double usdToRub = parseDollarToRub();
+
     private EditText tbDeposit;
     private EditText tbPeriod;
     private Spinner spinPeriod;
@@ -37,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         double percent = Double.parseDouble(tbPercent.getText().toString()) / 100;
         double income;
         double sum = 0;
+
+        if (tbDeposit.getText().toString().equals("") ||
+            tbPercent.getText().toString().equals("") ||
+            tbPeriod.getText().toString().equals("")) {
+        return;
+        }
 
         if (cbCapitalization.isChecked()) {
             switch (spinFrequency.getSelectedItem().toString()) {
@@ -88,13 +101,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDatePicker() {
-        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                month = month + 1;
-                String date = makeDateString(day, month, year);
-                btnDate.setText(date);
-            }
+        DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
+            month = month + 1;
+            String date = makeDateString(day, month, year);
+            btnDate.setText(date);
         };
 
         Calendar calendar = Calendar.getInstance();
@@ -171,39 +181,19 @@ public class MainActivity extends AppCompatActivity {
 
         spinFrequency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!tbDeposit.getText().toString().equals("") &&
-                        !tbPeriod.getText().toString().equals("") &&
-                        !tbPercent.getText().toString().equals("")) {
-                    calculate();
-                }
+                calculate();
             }
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         spinPeriod.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!tbDeposit.getText().toString().equals("") &&
-                    !tbPeriod.getText().toString().equals("") &&
-                    !tbPercent.getText().toString().equals("")) {
-                    calculate();
-                }
+                calculate();
             }
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
-        cbCapitalization.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-               @Override
-               public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
-                   if (!tbDeposit.getText().toString().equals("") &&
-                       !tbPeriod.getText().toString().equals("") &&
-                       !tbPercent.getText().toString().equals("")) {
-                       calculate();
-                   }
-               }
-           }
-        );
+
+        cbCapitalization.setOnCheckedChangeListener((buttonView, isChecked) -> calculate());
+
         tbDeposit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -211,13 +201,10 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if (!tbDeposit.getText().toString().equals("") &&
-                    !tbPeriod.getText().toString().equals("") &&
-                    !tbPercent.getText().toString().equals("")) {
-                    calculate();
-                }
+                calculate();
             }
         });
+
         tbPeriod.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -225,13 +212,10 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if (!tbDeposit.getText().toString().equals("") &&
-                    !tbPeriod.getText().toString().equals("") &&
-                    !tbPercent.getText().toString().equals("")) {
-                    calculate();
-                }
+                calculate();
             }
         });
+
         tbPercent.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -239,12 +223,23 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if (!tbDeposit.getText().toString().equals("") &&
-                    !tbPeriod.getText().toString().equals("") &&
-                    !tbPercent.getText().toString().equals("")) {
-                    calculate();
-                }
+                calculate();
             }
         });
+    }
+
+    public double parseDollarToRub() {
+        try {
+            JSONObject json = new JSONObject(
+                    IOUtils.toString(new URL(
+                            "https://free.currconv.com/api/v7/convert?apiKey=efdeb145deda59536479&q=USD_RUB&compact=ultra"
+                    ), StandardCharsets.UTF_8)
+            );
+            return json.getDouble("USD_RUB");
+        } catch (JSONException | IOException exception) {
+            exception.printStackTrace();
+        }
+        //Если вдруг не получилось запарсить
+        return 65;
     }
 }
