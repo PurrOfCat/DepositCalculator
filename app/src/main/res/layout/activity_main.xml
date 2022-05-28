@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/orange_200"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/lblIncome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:paddingEnd="10dp"
+        android:textAlignment="textEnd"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/txtIncome" />
+
+    <TextView
+        android:id="@+id/lblSum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:paddingEnd="10dp"
+        android:textAlignment="textEnd"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@+id/txtSum" />
+
+    <Spinner
+        android:id="@+id/spinFrequency"
+        android:layout_width="170dp"
+        android:layout_height="25dp"
+        android:entries="@array/capitalizationArray"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/cbCapitalization"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/txtPercent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:text="@string/percent"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/space2" />
+
+    <TextView
+        android:id="@+id/lblDeposit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:text="@string/deposit"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/space0"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/txtRub"
+        android:layout_width="60dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:paddingTop="10dp"
+        android:text="@string/rubles"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/tbDeposit"
+        app:layout_constraintTop_toTopOf="@+id/tbDeposit" />
+
+    <TextView
+        android:id="@+id/txtAnnual"
+        android:layout_width="165dp"
+        android:layout_height="50dp"
+        android:paddingTop="10dp"
+        android:text="@string/annual"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/tbPercent"
+        app:layout_constraintTop_toBottomOf="@+id/txtPercent" />
+
+    <EditText
+        android:id="@+id/tbDeposit"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:ems="10"
+        android:inputType="number"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/lblDeposit"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/lblPeriod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:text="@string/period"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/space1" />
+
+    <EditText
+        android:id="@+id/tbPeriod"
+        android:layout_width="245dp"
+        android:layout_height="50dp"
+        android:ems="10"
+        android:inputType="number"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/lblPeriod"
+        tools:ignore="MissingConstraints" />
+
+    <Spinner
+        android:id="@+id/spinPeriod"
+        android:layout_width="165dp"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:entries="@array/periodArray"
+        app:layout_constraintStart_toEndOf="@+id/tbPeriod"
+        app:layout_constraintTop_toBottomOf="@+id/lblPeriod" />
+
+    <TextView
+        android:id="@+id/txtOpeningDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:text="@string/opening_date"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/space3" />
+
+
+
+    <CheckBox
+        android:id="@+id/cbCapitalization"
+        android:layout_width="410dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:text="@string/capitalization"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@+id/space4"
+        tools:ignore="MissingConstraints" />
+
+    <Space
+        android:id="@+id/space4"
+        android:layout_width="410dp"
+        android:layout_height="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/btnDate"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/txtSum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:paddingEnd="10dp"
+        android:text="@string/sum"
+        android:textAlignment="textEnd"
+        android:textAllCaps="true"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/spinFrequency" />
+
+    <TextView
+        android:id="@+id/txtIncome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:paddingEnd="10dp"
+        android:text="@string/income"
+        android:textAlignment="textEnd"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/lblSum" />
+
+    <EditText
+        android:id="@+id/tbPercent"
+        android:layout_width="245dp"
+        android:layout_height="50dp"
+        android:digits="0123456789."
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/txtPercent"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/btnGraph"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/orange_700"
+        android:fontFamily="serif"
+        android:text="@string/show"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/space6"
+        app:layout_constraintTop_toBottomOf="@+id/lblIncome"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/btnDate"
+        style="?android:spinnerStyle"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:fontFamily="serif"
+        android:onClick="openDatePicker"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/space7"
+        app:layout_constraintTop_toBottomOf="@+id/txtOpeningDate"
+        tools:ignore="MissingConstraints" />
+
+    <Space
+        android:id="@+id/space0"
+        android:layout_width="410dp"
+        android:layout_height="25dp"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="1dp" />
+    <Space
+        android:id="@+id/space1"
+        android:layout_width="410dp"
+        android:layout_height="25dp"
+        app:layout_constraintTop_toBottomOf="@+id/tbDeposit"
+        tools:ignore="MissingConstraints" />
+    <Space
+        android:id="@+id/space2"
+        android:layout_width="410dp"
+        android:layout_height="25dp"
+        app:layout_constraintTop_toBottomOf="@+id/tbPeriod"
+        tools:ignore="MissingConstraints" />
+    <Space
+        android:id="@+id/space3"
+        android:layout_width="410dp"
+        android:layout_height="25dp"
+        app:layout_constraintTop_toBottomOf="@+id/tbPercent"
+        tools:layout_editor_absoluteX="1dp"
+        tools:ignore="MissingConstraints" />
+    <Space
+        android:id="@+id/space6"
+        android:layout_width="30dp"
+        android:layout_height="75dp"
+        app:layout_constraintTop_toBottomOf="@+id/lblIncome"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp" />
+    <Space
+        android:id="@+id/space7"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        app:layout_constraintTop_toBottomOf="@+id/txtOpeningDate"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

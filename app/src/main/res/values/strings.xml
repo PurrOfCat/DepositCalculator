@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Депозитный калькулятор</string>
+    <string name="deposit">Сумма вклада</string>
+    <string name="rubles">₽</string>
+    <string name="period">Срок вклада</string>
+    <string name="percent">Процентная ставка</string>
+    <string name="annual">% годовых</string>
+    <string name="opening_date">Дата открытия вклада</string>
+    <string name="show">Показать график начислений</string>
+    <string name="capitalization">Начисление процентов с учётом капитализации</string>
+    <string name="sum">Сумма к выплате</string>
+    <string name="income">Доход</string>
+    <string name="frequency">Периодичность начисления процентов</string>
+    <string-array name="periodArray">
+        <item>год/года/лет</item>
+        <item>месяц(а)(ев)</item>
+    </string-array>
+    <string-array name="capitalizationArray">
+        <item>Раз в месяц</item>
+        <item>Раз в квартал</item>
+        <item>Раз в полгода</item>
+        <item>Раз в год</item>
+    </string-array>
+</resources>
