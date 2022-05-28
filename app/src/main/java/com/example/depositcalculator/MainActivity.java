@@ -18,7 +18,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
@@ -49,9 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView lblIncome;
     private DatePickerDialog datePickerDialog;
 
-    private BottomSheetBehavior sheetBehavior;
-    private ConstraintLayout bottomSheet;
-
     TextView lblBottomSheet;
     ProgressBar pbBottomSheet;
 
@@ -74,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
         cbCapitalization = findViewById(R.id.cbCapitalization);
         lblSum = findViewById(R.id.lblSum);
         lblIncome = findViewById(R.id.lblIncome);
-        bottomSheet = findViewById(R.id.bottom_sheet);
-        sheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet);
+        BottomSheetBehavior.from(bottomSheet);
 
         lblBottomSheet = findViewById(R.id.text_view_sum);
         pbBottomSheet = findViewById(R.id.progress_bar);
@@ -238,21 +234,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private int calculateWeekCount() {
-        Calendar endDate = (Calendar) openDate.clone();
-        switch (spinPeriod.getSelectedItem().toString()) {
-            case "год/года/лет":
-                endDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
-                break;
-            case "месяц(а)(ев)":
-                endDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
-                break;
-        }
-
-        long diffInMillis = Math.abs(openDate.getTimeInMillis() - endDate.getTimeInMillis());
-        return (int) Math.floor((double) TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 7);
-    }
-
     private void convertCurrency() {
         if (!Objects.equals(currency, spinCurrency.getSelectedItem().toString())
                 && !tbDeposit.getText().toString().equals("")) {
@@ -279,6 +260,21 @@ public class MainActivity extends AppCompatActivity {
 
     public void openDatePicker(View view) {
         datePickerDialog.show();
+    }
+
+    private int calculateWeekCount() {
+        Calendar endDate = (Calendar) openDate.clone();
+        switch (spinPeriod.getSelectedItem().toString()) {
+            case "год/года/лет":
+                endDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
+                break;
+            case "месяц(а)(ев)":
+                endDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
+                break;
+        }
+
+        long diffInMillis = Math.abs(openDate.getTimeInMillis() - endDate.getTimeInMillis());
+        return (int) Math.floor((double) TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 7);
     }
 
     class AsyncRequest {
