@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText tbDeposit;
     private EditText tbPeriod;
     private Spinner spinPeriod;
+    private Spinner spinCurrency;
     private EditText tbPercent;
     private Spinner spinFrequency;
     private Button btnDate;
@@ -41,57 +44,29 @@ public class MainActivity extends AppCompatActivity {
     private Button btnGraph;
     private DatePickerDialog datePickerDialog;
 
-    public void calculate() {
-        if (tbDeposit.getText().toString().equals("") ||
-            tbPercent.getText().toString().equals("") ||
-            tbPeriod.getText().toString().equals("")) {
-        return;
-        }
+    private String currency = "₽";
 
-        double deposit = Integer.parseInt(tbDeposit.getText().toString());
-        double period = Integer.parseInt(tbPeriod.getText().toString());
-        double percent = Double.parseDouble(tbPercent.getText().toString()) / 100;
-        double income;
-        double sum = 0;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        new AsyncRequest().execute();
+        setContentView(R.layout.activity_main);
 
-        if (cbCapitalization.isChecked()) {
-            switch (spinFrequency.getSelectedItem().toString()) {
-                case "Раз в месяц":
-                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
-                        period = period * 12;
-                    }
-                    sum = deposit * Math.pow((1 + percent / 12), period);
-                    break;
-                case "Раз в квартал":
-                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
-                        period = period * 12;
-                    }
-                    sum = deposit * Math.pow((1 + (percent / 4)), Math.floor(period / 3));
-                    break;
-                case "Раз в полгода":
-                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
-                        period = period * 12;
-                    }
-                    sum =  deposit * Math.pow((1 + percent / 2), Math.floor(period / 6));
-                    break;
-                case "Раз в год":
-                    if ((spinPeriod.getSelectedItem().toString().equals("месяц(а)(ев)"))) {
-                        period = period / 12;
-                    }
-                    sum =  deposit * Math.pow((1 + percent), period);
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            if (spinPeriod.getSelectedItem().toString().equals("месяц(а)(ев)")) {
-                percent = percent / 12;
-            }
-            sum = deposit * (1 + percent * period);
-        }
-        income = sum - deposit;
-        lblSum.setText(Double.toString(Math.floor(sum)));
-        lblIncome.setText(Double.toString(Math.floor(income)));
+        tbDeposit = findViewById(R.id.tbDeposit);
+        tbPeriod = findViewById(R.id.tbPeriod);
+        spinPeriod = findViewById(R.id.spinPeriod);
+        spinCurrency = findViewById(R.id.spinCurrency);
+        tbPercent = findViewById(R.id.tbPercent);
+        spinFrequency = findViewById(R.id.spinFrequency);
+        btnDate = findViewById(R.id.btnDate);
+        cbCapitalization = findViewById(R.id.cbCapitalization);
+        lblSum = findViewById(R.id.lblSum);
+        lblIncome = findViewById(R.id.lblIncome);
+        btnGraph = findViewById(R.id.btnGraph);
+
+        btnDate.setText(getTodaysDate());
+        initDatePicker();
+        setupListeners();
     }
 
     private String getTodaysDate() {
@@ -101,27 +76,6 @@ public class MainActivity extends AppCompatActivity {
         month = month + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         return makeDateString(day, month, year);
-    }
-
-    private void initDatePicker() {
-        DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
-            month = month + 1;
-            String date = makeDateString(day, month, year);
-            btnDate.setText(date);
-        };
-
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        int style = AlertDialog.THEME_HOLO_LIGHT;
-
-        datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day);
-    }
-
-    public void openDatePicker(View view) {
-        datePickerDialog.show();
     }
 
     private String makeDateString(int day, int month, int year) {
@@ -163,34 +117,119 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        new AsyncRequest().execute();
-        setContentView(R.layout.activity_main);
+    private void initDatePicker() {
+        DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
+            month = month + 1;
+            String date = makeDateString(day, month, year);
+            btnDate.setText(date);
+        };
 
-        tbDeposit = findViewById(R.id.tbDeposit);
-        tbPeriod = findViewById(R.id.tbPeriod);
-        spinPeriod = findViewById(R.id.spinPeriod);
-        tbPercent = findViewById(R.id.tbPercent);
-        spinFrequency = findViewById(R.id.spinFrequency);
-        btnDate = findViewById(R.id.btnDate);
-        cbCapitalization = findViewById(R.id.cbCapitalization);
-        lblSum = findViewById(R.id.lblSum);
-        lblIncome = findViewById(R.id.lblIncome);
-        btnGraph = findViewById(R.id.btnGraph);
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        btnDate.setText(getTodaysDate());
-        initDatePicker();
+        int style = AlertDialog.THEME_HOLO_LIGHT;
 
+        datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day);
+    }
+
+    private void calculate() {
+        if (tbDeposit.getText().toString().equals("") ||
+                tbPercent.getText().toString().equals("") ||
+                tbPeriod.getText().toString().equals("")) {
+            return;
+        }
+
+        double deposit = Double.parseDouble(tbDeposit.getText().toString());
+        double period = Integer.parseInt(tbPeriod.getText().toString());
+        double percent = Double.parseDouble(tbPercent.getText().toString()) / 100;
+        double income;
+        double sum = 0;
+
+        if (Objects.equals(currency, "$")) {
+            deposit *= usdToRub;
+        }
+
+        if (cbCapitalization.isChecked()) {
+            switch (spinFrequency.getSelectedItem().toString()) {
+                case "Раз в месяц":
+                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
+                        period = period * 12;
+                    }
+                    sum = deposit * Math.pow((1 + percent / 12), period);
+                    break;
+                case "Раз в квартал":
+                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
+                        period = period * 12;
+                    }
+                    sum = deposit * Math.pow((1 + (percent / 4)), Math.floor(period / 3));
+                    break;
+                case "Раз в полгода":
+                    if (spinPeriod.getSelectedItem().toString().equals("год/года/лет")) {
+                        period = period * 12;
+                    }
+                    sum = deposit * Math.pow((1 + percent / 2), Math.floor(period / 6));
+                    break;
+                case "Раз в год":
+                    if ((spinPeriod.getSelectedItem().toString().equals("месяц(а)(ев)"))) {
+                        period = period / 12;
+                    }
+                    sum = deposit * Math.pow((1 + percent), period);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            if (spinPeriod.getSelectedItem().toString().equals("месяц(а)(ев)")) {
+                percent = percent / 12;
+            }
+            sum = deposit * (1 + percent * period);
+        }
+        income = sum - deposit;
+        lblSum.setText(String.format(Locale.getDefault(), "%.3f", sum));
+        lblIncome.setText(String.format(Locale.getDefault(), "%.3f", income));
+    }
+
+    private void setupListeners() {
         spinFrequency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 calculate();
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
+
         spinPeriod.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                calculate();
+            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        spinCurrency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (!Objects.equals(currency, spinCurrency.getSelectedItem().toString())
+                        && !tbDeposit.getText().toString().equals("")) {
+                    switch (currency) {
+                        case "₽": {
+                            tbDeposit.setText(String.format(
+                                    Locale.getDefault(),
+                                    "%.3f",
+                                    Double.parseDouble(tbDeposit.getText().toString()) / usdToRub)
+                            );
+                            break;
+                        }
+                        case "$": {
+                            tbDeposit.setText(
+                                    String.format(Locale.getDefault(),
+                                    "%.3f",
+                                    Double.parseDouble(tbDeposit.getText().toString()) * usdToRub)
+                            );
+                            break;
+                        }
+                    }
+                }
+                currency = spinCurrency.getSelectedItem().toString();
                 calculate();
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
@@ -230,6 +269,10 @@ public class MainActivity extends AppCompatActivity {
                 calculate();
             }
         });
+    }
+
+    public void openDatePicker(View view) {
+        datePickerDialog.show();
     }
 
     class AsyncRequest {

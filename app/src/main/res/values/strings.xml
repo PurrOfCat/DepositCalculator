@@ -11,6 +11,10 @@
     <string name="sum">Сумма к выплате</string>
     <string name="income">Доход</string>
     <string name="frequency">Периодичность начисления процентов</string>
+    <string-array name="currenciesArray">
+        <item>₽</item>
+        <item>$</item>
+    </string-array>
     <string-array name="periodArray">
         <item>год/года/лет</item>
         <item>месяц(а)(ев)</item>

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="serif"
         android:includeFontPadding="false"
-        android:paddingEnd="10dp"
+        android:paddingHorizontal="10dp"
         android:textAlignment="textEnd"
         android:textAllCaps="false"
         android:textColor="#000000"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="serif"
         android:includeFontPadding="false"
-        android:paddingEnd="10dp"
+        android:paddingHorizontal="10dp"
         android:textAlignment="textEnd"
         android:textAllCaps="false"
         android:textColor="#000000"
@@ -67,17 +67,16 @@
         app:layout_constraintTop_toBottomOf="@+id/space0"
         tools:ignore="MissingConstraints" />
 
-    <TextView
-        android:id="@+id/txtRub"
-        android:layout_width="60dp"
+    <Spinner
+        android:id="@+id/spinCurrency"
+        android:layout_width="80dp"
         android:layout_height="50dp"
         android:layout_weight="1"
         android:paddingTop="10dp"
-        android:text="@string/rubles"
-        android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:entries="@array/currenciesArray"
         app:layout_constraintStart_toEndOf="@+id/tbDeposit"
         app:layout_constraintTop_toTopOf="@+id/tbDeposit" />
 
@@ -95,10 +94,10 @@
 
     <EditText
         android:id="@+id/tbDeposit"
-        android:layout_width="350dp"
+        android:layout_width="330dp"
         android:layout_height="50dp"
         android:ems="10"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:textSize="20sp"
         app:layout_constraintTop_toBottomOf="@+id/lblDeposit"
         tools:ignore="MissingConstraints" />
