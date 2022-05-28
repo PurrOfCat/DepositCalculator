@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,9 +23,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-    private final double usdToRub = parseDollarToRub();
+    private double usdToRub = 65;
 
     private EditText tbDeposit;
     private EditText tbPeriod;
@@ -39,17 +42,17 @@ public class MainActivity extends AppCompatActivity {
     private DatePickerDialog datePickerDialog;
 
     public void calculate() {
-        double deposit = Integer.parseInt(tbDeposit.getText().toString());
-        double period = Integer.parseInt(tbPeriod.getText().toString());
-        double percent = Double.parseDouble(tbPercent.getText().toString()) / 100;
-        double income;
-        double sum = 0;
-
         if (tbDeposit.getText().toString().equals("") ||
             tbPercent.getText().toString().equals("") ||
             tbPeriod.getText().toString().equals("")) {
         return;
         }
+
+        double deposit = Integer.parseInt(tbDeposit.getText().toString());
+        double period = Integer.parseInt(tbPeriod.getText().toString());
+        double percent = Double.parseDouble(tbPercent.getText().toString()) / 100;
+        double income;
+        double sum = 0;
 
         if (cbCapitalization.isChecked()) {
             switch (spinFrequency.getSelectedItem().toString()) {
@@ -163,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new AsyncRequest().execute();
         setContentView(R.layout.activity_main);
 
         tbDeposit = findViewById(R.id.tbDeposit);
@@ -228,18 +232,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public double parseDollarToRub() {
-        try {
-            JSONObject json = new JSONObject(
-                    IOUtils.toString(new URL(
-                            "https://free.currconv.com/api/v7/convert?apiKey=efdeb145deda59536479&q=USD_RUB&compact=ultra"
-                    ), StandardCharsets.UTF_8)
-            );
-            return json.getDouble("USD_RUB");
-        } catch (JSONException | IOException exception) {
-            exception.printStackTrace();
+    class AsyncRequest {
+        private final Executor executor = Executors.newSingleThreadExecutor();
+
+        Runnable parseDollarToRub = () -> {
+            try {
+                JSONObject json = new JSONObject(
+                        IOUtils.toString(new URL(
+                                "https://free.currconv.com/api/v7/convert?apiKey=efdeb145deda59536479&q=USD_RUB&compact=ultra"
+                        ), StandardCharsets.UTF_8)
+                );
+                usdToRub = json.getDouble("USD_RUB");
+                Log.i("USD_RUB", "Current exchange rate: " + usdToRub);
+            } catch (JSONException | IOException exception) {
+                exception.printStackTrace();
+            }
+        };
+
+        public void execute() {
+            executor.execute(parseDollarToRub);
         }
-        //Если вдруг не получилось запарсить
-        return 65;
     }
 }
