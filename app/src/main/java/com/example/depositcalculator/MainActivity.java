@@ -1,5 +1,6 @@
 package com.example.depositcalculator;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -12,8 +13,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
@@ -27,6 +32,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private double usdToRub = 65;
@@ -41,10 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox cbCapitalization;
     private TextView lblSum;
     private TextView lblIncome;
-    private Button btnGraph;
     private DatePickerDialog datePickerDialog;
 
+    private BottomSheetBehavior sheetBehavior;
+    private ConstraintLayout bottomSheet;
+
+    TextView lblBottomSheet;
+    ProgressBar pbBottomSheet;
+
     private String currency = "₽";
+    private Calendar openDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +74,11 @@ public class MainActivity extends AppCompatActivity {
         cbCapitalization = findViewById(R.id.cbCapitalization);
         lblSum = findViewById(R.id.lblSum);
         lblIncome = findViewById(R.id.lblIncome);
-        btnGraph = findViewById(R.id.btnGraph);
+        bottomSheet = findViewById(R.id.bottom_sheet);
+        sheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        lblBottomSheet = findViewById(R.id.text_view_sum);
+        pbBottomSheet = findViewById(R.id.progress_bar);
 
         btnDate.setText(getTodaysDate());
         initDatePicker();
@@ -70,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getTodaysDate() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        openDate = Calendar.getInstance();
+        int year = openDate.get(Calendar.YEAR);
+        int month = openDate.get(Calendar.MONTH);
         month = month + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int day = openDate.get(Calendar.DAY_OF_MONTH);
         return makeDateString(day, month, year);
     }
 
@@ -86,37 +102,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String getMonthInString(int month) {
-        switch (month) {
-            case 1:
-                return "январь";
-            case 2:
-                return "февраль";
-            case 3:
-                return "март";
-            case 4:
-                return "апрель";
-            case 5:
-                return "май";
-            case 6:
-                return "июнь";
-            case 7:
-                return "июль";
-            case 8:
-                return "август";
-            case 9:
-                return "сентябрь";
-            case 10:
-                return "октябрь";
-            case 11:
-                return "ноябрь";
-            case 12:
-                return "декабрь";
-            default:
-                return "никогда не произойдёт";
-        }
-    }
-
     private void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
             month = month + 1;
@@ -124,10 +109,10 @@ public class MainActivity extends AppCompatActivity {
             btnDate.setText(date);
         };
 
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        openDate = Calendar.getInstance();
+        int year = openDate.get(Calendar.YEAR);
+        int month = openDate.get(Calendar.MONTH);
+        int day = openDate.get(Calendar.DAY_OF_MONTH);
 
         int style = AlertDialog.THEME_HOLO_LIGHT;
 
@@ -187,8 +172,10 @@ public class MainActivity extends AppCompatActivity {
             sum = deposit * (1 + percent * period);
         }
         income = sum - deposit;
-        lblSum.setText(String.format(Locale.getDefault(), "%.3f", sum));
-        lblIncome.setText(String.format(Locale.getDefault(), "%.3f", income));
+        lblBottomSheet.setText(String.format(Locale.getDefault(), "%.3f₽", sum));
+        pbBottomSheet.setProgress((int) (deposit / sum * 100));
+        lblSum.setText(String.format(Locale.getDefault(), "%.3f₽ / %.3f$", sum, sum / usdToRub));
+        lblIncome.setText(String.format(Locale.getDefault(), "%.3f₽ / %.3f$", income, income / usdToRub));
     }
 
     private void setupListeners() {
@@ -208,27 +195,7 @@ public class MainActivity extends AppCompatActivity {
 
         spinCurrency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!Objects.equals(currency, spinCurrency.getSelectedItem().toString())
-                        && !tbDeposit.getText().toString().equals("")) {
-                    switch (currency) {
-                        case "₽": {
-                            tbDeposit.setText(String.format(
-                                    Locale.getDefault(),
-                                    "%.3f",
-                                    Double.parseDouble(tbDeposit.getText().toString()) / usdToRub)
-                            );
-                            break;
-                        }
-                        case "$": {
-                            tbDeposit.setText(
-                                    String.format(Locale.getDefault(),
-                                    "%.3f",
-                                    Double.parseDouble(tbDeposit.getText().toString()) * usdToRub)
-                            );
-                            break;
-                        }
-                    }
-                }
+                convertCurrency();
                 currency = spinCurrency.getSelectedItem().toString();
                 calculate();
             }
@@ -269,6 +236,45 @@ public class MainActivity extends AppCompatActivity {
                 calculate();
             }
         });
+    }
+
+    private int calculateWeekCount() {
+        Calendar endDate = (Calendar) openDate.clone();
+        switch (spinPeriod.getSelectedItem().toString()) {
+            case "год/года/лет":
+                endDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
+                break;
+            case "месяц(а)(ев)":
+                endDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
+                break;
+        }
+
+        long diffInMillis = Math.abs(openDate.getTimeInMillis() - endDate.getTimeInMillis());
+        return (int) Math.floor((double) TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 7);
+    }
+
+    private void convertCurrency() {
+        if (!Objects.equals(currency, spinCurrency.getSelectedItem().toString())
+                && !tbDeposit.getText().toString().equals("")) {
+            switch (currency) {
+                case "₽": {
+                    tbDeposit.setText(String.format(
+                            Locale.getDefault(),
+                            "%.3f",
+                            Double.parseDouble(tbDeposit.getText().toString()) / usdToRub)
+                    );
+                    break;
+                }
+                case "$": {
+                    tbDeposit.setText(
+                            String.format(Locale.getDefault(),
+                                    "%.3f",
+                                    Double.parseDouble(tbDeposit.getText().toString()) * usdToRub)
+                    );
+                    break;
+                }
+            }
+        }
     }
 
     public void openDatePicker(View view) {

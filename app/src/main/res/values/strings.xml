@@ -11,6 +11,8 @@
     <string name="sum">Сумма к выплате</string>
     <string name="income">Доход</string>
     <string name="frequency">Периодичность начисления процентов</string>
+    <string name="graphLabel">График доходности</string>
+    <string name="show_graph">График</string>
     <string-array name="currenciesArray">
         <item>₽</item>
         <item>$</item>
