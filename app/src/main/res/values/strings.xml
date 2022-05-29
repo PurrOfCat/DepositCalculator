@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Депозитный калькулятор</string>
     <string name="deposit">Сумма вклада</string>
-    <string name="rubles">₽</string>
     <string name="period">Срок вклада</string>
     <string name="percent">Процентная ставка</string>
     <string name="annual">% годовых</string>
     <string name="opening_date">Дата открытия вклада</string>
+    <string name="closing_date">Закрытие: </string>
     <string name="show">Показать график начислений</string>
     <string name="capitalization">Начисление процентов с учётом капитализации</string>
     <string name="sum">Сумма к выплате</string>

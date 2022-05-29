@@ -36,23 +36,24 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
     private double usdToRub = 65;
 
+    private Button btnDate;
+    private TextView lblSum;
+    private TextView lblClosing;
+    private TextView lblIncome;
     private EditText tbDeposit;
     private EditText tbPeriod;
+    private EditText tbPercent;
     private Spinner spinPeriod;
     private Spinner spinCurrency;
-    private EditText tbPercent;
     private Spinner spinFrequency;
-    private Button btnDate;
     private CheckBox cbCapitalization;
-    private TextView lblSum;
-    private TextView lblIncome;
     private DatePickerDialog datePickerDialog;
 
     TextView lblBottomSheet;
     ProgressBar pbBottomSheet;
-
     private String currency = "₽";
-    private Calendar openDate;
+    private Calendar openingDate;
+    private Calendar closingDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,34 +61,52 @@ public class MainActivity extends AppCompatActivity {
         new AsyncRequest().execute();
         setContentView(R.layout.activity_main);
 
-        tbDeposit = findViewById(R.id.tbDeposit);
-        tbPeriod = findViewById(R.id.tbPeriod);
-        spinPeriod = findViewById(R.id.spinPeriod);
-        spinCurrency = findViewById(R.id.spinCurrency);
-        tbPercent = findViewById(R.id.tbPercent);
-        spinFrequency = findViewById(R.id.spinFrequency);
         btnDate = findViewById(R.id.btnDate);
-        cbCapitalization = findViewById(R.id.cbCapitalization);
         lblSum = findViewById(R.id.lblSum);
         lblIncome = findViewById(R.id.lblIncome);
+        lblClosing = findViewById(R.id.lblClosing);
+        tbDeposit = findViewById(R.id.tbDeposit);
+        tbPeriod = findViewById(R.id.tbPeriod);
+        tbPercent = findViewById(R.id.tbPercent);
+        spinPeriod = findViewById(R.id.spinPeriod);
+        spinCurrency = findViewById(R.id.spinCurrency);
+        spinFrequency = findViewById(R.id.spinFrequency);
+        cbCapitalization = findViewById(R.id.cbCapitalization);
+
         ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet);
         BottomSheetBehavior.from(bottomSheet);
 
         lblBottomSheet = findViewById(R.id.text_view_sum);
         pbBottomSheet = findViewById(R.id.progress_bar);
 
+        setupListeners();
         btnDate.setText(getTodaysDate());
         initDatePicker();
-        setupListeners();
     }
 
     private String getTodaysDate() {
-        openDate = Calendar.getInstance();
-        int year = openDate.get(Calendar.YEAR);
-        int month = openDate.get(Calendar.MONTH);
-        month = month + 1;
-        int day = openDate.get(Calendar.DAY_OF_MONTH);
+        openingDate = Calendar.getInstance();
+        int day = openingDate.get(Calendar.DAY_OF_MONTH);
+        int month = openingDate.get(Calendar.MONTH) + 1;
+        int year = openingDate.get(Calendar.YEAR);
         return makeDateString(day, month, year);
+    }
+
+    private void setClosingDate() {
+        if (!tbPeriod.getText().toString().equals("")) {
+            closingDate = (Calendar) openingDate.clone();
+            switch (spinPeriod.getSelectedItem().toString()) {
+                case "год/года/лет":
+                    closingDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
+                    break;
+                case "месяц(а)(ев)":
+                    closingDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
+                    break;
+            }
+            lblClosing.setText(makeDateString(closingDate.get(Calendar.DAY_OF_MONTH), (closingDate.get(Calendar.MONTH) + 1), closingDate.get(Calendar.YEAR)));
+        } else {
+            lblClosing.setText("");
+        }
     }
 
     private String makeDateString(int day, int month, int year) {
@@ -101,24 +120,23 @@ public class MainActivity extends AppCompatActivity {
     private void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
             month = month + 1;
-            String date = makeDateString(day, month, year);
-            btnDate.setText(date);
+            btnDate.setText(makeDateString(day, month, year));
+            setClosingDate();
         };
+        openingDate = Calendar.getInstance();
+        datePickerDialog = new DatePickerDialog(this, AlertDialog.THEME_HOLO_LIGHT, dateSetListener, openingDate.get(Calendar.YEAR), openingDate.get(Calendar.MONTH), openingDate.get(Calendar.DAY_OF_MONTH));
+    }
 
-        openDate = Calendar.getInstance();
-        int year = openDate.get(Calendar.YEAR);
-        int month = openDate.get(Calendar.MONTH);
-        int day = openDate.get(Calendar.DAY_OF_MONTH);
-
-        int style = AlertDialog.THEME_HOLO_LIGHT;
-
-        datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day);
+    public void openingDate(View view) {
+        datePickerDialog.show();
     }
 
     private void calculate() {
         if (tbDeposit.getText().toString().equals("") ||
-                tbPercent.getText().toString().equals("") ||
-                tbPeriod.getText().toString().equals("")) {
+            tbPercent.getText().toString().equals("") ||
+            tbPeriod.getText().toString().equals("")) {
+            lblSum.setText("");
+            lblIncome.setText("");
             return;
         }
 
@@ -185,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
         spinPeriod.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 calculate();
+                setClosingDate();
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
@@ -219,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 calculate();
+                setClosingDate();
             }
         });
 
@@ -242,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                     tbDeposit.setText(String.format(
                             Locale.getDefault(),
                             "%.3f",
-                            Double.parseDouble(tbDeposit.getText().toString()) / usdToRub)
+                            Double.parseDouble(tbDeposit.getText().toString()) / usdToRub).replace(',', '.')
                     );
                     break;
                 }
@@ -250,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
                     tbDeposit.setText(
                             String.format(Locale.getDefault(),
                                     "%.3f",
-                                    Double.parseDouble(tbDeposit.getText().toString()) * usdToRub)
+                                    Double.parseDouble(tbDeposit.getText().toString()) * usdToRub).replace(',', '.')
                     );
                     break;
                 }
@@ -258,28 +278,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void openDatePicker(View view) {
-        datePickerDialog.show();
-    }
+
 
     private int calculateWeekCount() {
-        Calendar endDate = (Calendar) openDate.clone();
+        Calendar closingDate = (Calendar) openingDate.clone();
         switch (spinPeriod.getSelectedItem().toString()) {
             case "год/года/лет":
-                endDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
+                closingDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
                 break;
             case "месяц(а)(ев)":
-                endDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
+                closingDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
                 break;
         }
-
-        long diffInMillis = Math.abs(openDate.getTimeInMillis() - endDate.getTimeInMillis());
+        long diffInMillis = Math.abs(openingDate.getTimeInMillis() - closingDate.getTimeInMillis());
         return (int) Math.floor((double) TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 7);
     }
 
     class AsyncRequest {
         private final Executor executor = Executors.newSingleThreadExecutor();
-
         Runnable parseDollarToRub = () -> {
             try {
                 JSONObject json = new JSONObject(
@@ -293,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
                 exception.printStackTrace();
             }
         };
-
         public void execute() {
             executor.execute(parseDollarToRub);
         }
