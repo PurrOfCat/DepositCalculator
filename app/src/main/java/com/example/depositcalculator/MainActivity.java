@@ -103,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
                     closingDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
                     break;
             }
-            lblClosing.setText(makeDateString(closingDate.get(Calendar.DAY_OF_MONTH), (closingDate.get(Calendar.MONTH) + 1), closingDate.get(Calendar.YEAR)));
+            lblClosing.setText(
+                    makeDateString(closingDate.get(Calendar.DAY_OF_MONTH), (closingDate.get(Calendar.MONTH) + 1), closingDate.get(Calendar.YEAR)));
         } else {
             lblClosing.setText("");
         }
@@ -121,9 +122,9 @@ public class MainActivity extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
             month = month + 1;
             btnDate.setText(makeDateString(day, month, year));
+            openingDate.set(year, month, day);
             setClosingDate();
         };
-        openingDate = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(this, AlertDialog.THEME_HOLO_LIGHT, dateSetListener, openingDate.get(Calendar.YEAR), openingDate.get(Calendar.MONTH), openingDate.get(Calendar.DAY_OF_MONTH));
     }
 
@@ -186,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
             sum = deposit * (1 + percent * period);
         }
         income = sum - deposit;
+        setClosingDate();
         lblBottomSheet.setText(String.format(Locale.getDefault(), "%.3f₽", sum));
         pbBottomSheet.setProgress((int) (deposit / sum * 100));
         lblSum.setText(String.format(Locale.getDefault(), "%.3f₽ / %.3f$", sum, sum / usdToRub));
@@ -203,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
         spinPeriod.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 calculate();
-                setClosingDate();
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
@@ -238,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 calculate();
-                setClosingDate();
             }
         });
 
