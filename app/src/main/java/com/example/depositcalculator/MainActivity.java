@@ -187,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
             sum = deposit * (1 + percent * period);
         }
         income = sum - deposit;
-        setClosingDate();
         lblBottomSheet.setText(String.format(Locale.getDefault(), "%.3f₽", sum));
         pbBottomSheet.setProgress((int) (deposit / sum * 100));
         lblSum.setText(String.format(Locale.getDefault(), "%.3f₽ / %.3f$", sum, sum / usdToRub));
@@ -238,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
+                setClosingDate();
                 calculate();
             }
         });
@@ -276,22 +276,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-
-
-    private int calculateWeekCount() {
-        Calendar closingDate = (Calendar) openingDate.clone();
-        switch (spinPeriod.getSelectedItem().toString()) {
-            case "год/года/лет":
-                closingDate.add(Calendar.YEAR, Integer.parseInt(tbPeriod.getText().toString()));
-                break;
-            case "месяц(а)(ев)":
-                closingDate.add(Calendar.MONTH, Integer.parseInt(tbPeriod.getText().toString()));
-                break;
-        }
-        long diffInMillis = Math.abs(openingDate.getTimeInMillis() - closingDate.getTimeInMillis());
-        return (int) Math.floor((double) TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) / 7);
     }
 
     class AsyncRequest {
